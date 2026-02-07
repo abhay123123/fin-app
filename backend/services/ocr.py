@@ -3,9 +3,23 @@ import pytesseract
 from PIL import Image
 from io import BytesIO
 
-# Set tesseract path if not in system PATH
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import shutil
+import os
 
+# Set tesseract path
+# 1. Try to find in system PATH (works for Linux/Docker/Correctly configured Windows)
+tesseract_path = shutil.which("tesseract")
+
+# 2. If not found, fall back to common Windows location
+if not tesseract_path:
+    possible_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    if os.path.exists(possible_path):
+        tesseract_path = possible_path
+
+if tesseract_path:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+else:
+    print("Warning: Tesseract not found in PATH or common locations.")
 def extract_text_from_image(image_bytes: bytes) -> str:
     """
     Extracts text from an image byte stream using Tesseract OCR.
