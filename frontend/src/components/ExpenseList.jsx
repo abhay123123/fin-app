@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { deleteExpense } from '../api';
 import { Trash2, Edit } from 'lucide-react';
 
@@ -36,36 +37,47 @@ const ExpenseList = ({ refreshTrigger, expenses: propExpenses, onEdit, onDelete 
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {expenses.map((expense) => (
-                            <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(expense.created_at).toLocaleDateString()}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">{expense.store_name || '-'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    <span className="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
-                                        {expense.category}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title={expense.description}>{expense.description || '-'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right font-bold">${expense.amount.toFixed(2)}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button onClick={() => onEdit(expense)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-4 p-1 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 rounded-full transition-colors">
-                                        <Edit className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        onClick={async () => {
-                                            if (window.confirm('Delete this expense?')) {
-                                                await deleteExpense(expense.id);
-                                                if (onDelete) onDelete();
-                                            }
-                                        }}
-                                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-full transition-colors"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                    <tbody className="bg-white/50 dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700 backdrop-blur-sm">
+                        <AnimatePresence>
+                            {expenses.map((expense, index) => (
+                                <motion.tr
+                                    key={expense.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.05)" }}
+                                    className="hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 transition-colors"
+                                >
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(expense.created_at).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">{expense.store_name || '-'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <span className="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                                            {expense.category}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title={expense.description}>{expense.description || '-'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right font-bold">${expense.amount.toFixed(2)}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <motion.button whileHover={{ scale: 1.2 }} onClick={() => onEdit(expense)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-4 p-1 rounded-full">
+                                            <Edit className="h-4 w-4" />
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.2, rotate: 10 }}
+                                            onClick={async () => {
+                                                if (window.confirm('Delete this expense?')) {
+                                                    await deleteExpense(expense.id);
+                                                    if (onDelete) onDelete();
+                                                }
+                                            }}
+                                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </motion.button>
+                                    </td>
+                                </motion.tr>
+                            ))}
+                        </AnimatePresence>
                     </tbody>
                 </table>
             </div>

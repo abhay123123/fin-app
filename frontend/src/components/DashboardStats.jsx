@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Wallet, Activity, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getBudget } from '../api';
 
 const DashboardStats = ({ expenses, refreshTrigger }) => {
@@ -50,44 +51,68 @@ const DashboardStats = ({ expenses, refreshTrigger }) => {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="glass rounded-xl shadow-lg p-6 border border-white/20"
+            >
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">${stats.total.toFixed(2)}</p>
                     </div>
-                    <div className="p-3 bg-indigo-50 rounded-full">
-                        <Wallet className="h-6 w-6 text-indigo-600" />
+                    <div className="p-3 bg-indigo-500/10 rounded-full backdrop-blur-sm">
+                        <Wallet className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
+                className="glass rounded-xl shadow-lg p-6 border border-white/20"
+            >
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Transactions</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.count}</p>
                     </div>
-                    <div className="p-3 bg-green-50 rounded-full">
-                        <Activity className="h-6 w-6 text-green-600" />
+                    <div className="p-3 bg-green-500/10 rounded-full backdrop-blur-sm">
+                        <Activity className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                className="glass rounded-xl shadow-lg p-6 border border-white/20"
+            >
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Top Category</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.topCategory}</p>
                     </div>
-                    <div className="p-3 bg-amber-50 rounded-full">
-                        <TrendingUp className="h-6 w-6 text-amber-600" />
+                    <div className="p-3 bg-amber-500/10 rounded-full backdrop-blur-sm">
+                        <TrendingUp className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Budget Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+                className="glass rounded-xl shadow-lg p-6 border border-white/20"
+            >
                 <div className="flex flex-col h-full justify-between">
                     <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Budget</p>
@@ -100,14 +125,16 @@ const DashboardStats = ({ expenses, refreshTrigger }) => {
                             )}
                         </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
-                        <div
+                    <div className="w-full bg-gray-200/50 rounded-full h-2.5 mt-4 overflow-hidden">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${budgetProgress}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
                             className={`h-2.5 rounded-full ${progressColor}`}
-                            style={{ width: `${budgetProgress}%` }}
-                        ></div>
+                        ></motion.div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

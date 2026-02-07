@@ -70,8 +70,8 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+    <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark text-white' : 'text-gray-900'}`}>
+      <nav className="glass sticky top-0 z-50 border-b border-gray-200/20 dark:border-gray-700/20 transition-all duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -111,7 +111,7 @@ function App() {
           <div className="lg:col-span-1 space-y-6">
             <SpendingChart expenses={expenses} />
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="glass rounded-xl shadow-lg border border-white/20 overflow-hidden">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
               </div>
