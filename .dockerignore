@@ -1,0 +1,14 @@
+frontend/node_modules
+frontend/dist
+.git
+.vscode
+__pycache__
+*.pyc
+*.pyo
+env
+venv
+.env
+expenses.db
+temp_*
+render-build.sh
+deployment_guide.md
