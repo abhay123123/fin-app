@@ -22,7 +22,6 @@ const ExpenseList = ({ refreshTrigger, expenses: propExpenses, onEdit, onDelete 
     }, [refreshTrigger, propExpenses]);
 
     return (
-    return (
         <div>
             {/* Desktop View (Table) */}
             <div className="hidden md:block overflow-x-auto">
@@ -119,7 +118,6 @@ const ExpenseList = ({ refreshTrigger, expenses: propExpenses, onEdit, onDelete 
                 ))}
             </div>
         </div>
-    );
     );
 };
 
