@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
-from backend.routers import expenses, budgets, categories, chate
+from .routers import expenses, budgets, categories, chat
 from datetime import timedelta
 from .services import ocr
 import shutil
