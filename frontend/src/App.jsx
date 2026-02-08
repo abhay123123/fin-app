@@ -10,6 +10,7 @@ import { LayoutDashboard } from 'lucide-react';
 import ThemeToggle from './components/ThemeToggle';
 import CategoryManager from './components/CategoryManager';
 import DateRangeFilter from './components/DateRangeFilter';
+import AIChat from './components/AIChat';
 
 function App() {
   const [refreshList, setRefreshList] = useState(0);
@@ -159,6 +160,7 @@ function App() {
           </div>
         </div>
       </main>
+      <AIChat />
     </div>
   );
 }
