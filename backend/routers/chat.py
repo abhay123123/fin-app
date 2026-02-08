@@ -19,4 +19,6 @@ def chat_with_analyst(request: ChatRequest, db: Session = Depends(get_db)):
         response_text = analyst.analyze(request.message)
         return ChatResponse(response=response_text)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"AI Analyst Info: {str(e)}") # Keep internal log
+        # Return the error to the user for debugging purposes during dev
+        return ChatResponse(response=f"I encountered an error: {str(e)}")
