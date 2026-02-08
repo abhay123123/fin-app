@@ -156,7 +156,7 @@ def create_category(category: schemas.CategoryCreate, db: Session = Depends(data
     return db_category
 
 app.include_router(categories.router, prefix="/api", tags=["categories"])
-app.include_router(chate.router, prefix="/api", tags=["chat"])
+app.include_router(chat.router, prefix="/api", tags=["chat"])
 
 @app.delete("/categories/{category_id}")
 def delete_category(category_id: int, db: Session = Depends(database.get_db)):
