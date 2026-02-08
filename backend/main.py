@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
-from .routers import expenses, budgets, categories, chat
+from .routers import chat
 from datetime import timedelta
 from .services import ocr
 import shutil
@@ -155,7 +155,7 @@ def create_category(category: schemas.CategoryCreate, db: Session = Depends(data
     db.refresh(db_category)
     return db_category
 
-app.include_router(categories.router, prefix="/api", tags=["categories"])
+
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 
 @app.delete("/categories/{category_id}")
