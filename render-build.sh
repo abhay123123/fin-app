@@ -7,7 +7,11 @@ pip install -r requirements.txt
 
 # Install frontend dependencies and build
 cd frontend
-npm install
+if [ -f package-lock.json ]; then
+  npm ci --no-audit --no-fund
+else
+  npm install --no-audit --no-fund
+fi
 npm run build
 
 # Move back to root

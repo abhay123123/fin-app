@@ -12,9 +12,16 @@ app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
 
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://spendwise-frontend-ey25.onrender.com",
+    "https://spendwise-backend-6n8n.onrender.com"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
