@@ -5,7 +5,7 @@ from sqlalchemy import func
 from ..models import Expense, Category, Budget
 from datetime import datetime
 import calendar
-from openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,8 +13,12 @@ load_dotenv()
 class AIAnalyst:
     def __init__(self, db: Session):
         self.db = db
-        api_key = os.getenv("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=api_key) if api_key else None
+        api_key = os.getenv("GEMINI_API_KEY")
+        if api_key:
+            genai.configure(api_key=api_key)
+            self.model = genai.GenerativeModel('gemini-pro')
+        else:
+            self.model = None
 
     def analyze(self, query: str) -> str:
         query_lower = query.lower().strip()
@@ -44,11 +48,11 @@ class AIAnalyst:
         if "recent" in query_lower or "last transaction" in query_lower:
             return self._get_recent_transactions()
 
-        # Fallback to LLM
-        if self.client:
+        # Fallback to LLM (Gemini)
+        if self.model:
             return self._ask_llm(query)
 
-        return "I'm still learning! Configure OPENAI_API_KEY to unlock my full potential, or ask: 'Total spent?', 'How much on Food?'"
+        return "I'm still learning! Configure GEMINI_API_KEY to unlock my full potential, or ask: 'Total spent?', 'How much on Food?'"
 
     def _get_total_spent(self) -> str:
         total = self.db.query(func.sum(Expense.amount)).scalar() or 0.0
@@ -86,26 +90,22 @@ class AIAnalyst:
             categories = [c.name for c in self.db.query(Category).all()]
             
             # Simple context prompt
-            system_prompt = f"""
+            context_prompt = f"""
             You are a financial assistant for a personal expense tracker app.
             Database Context:
             - Total Spent All Time: ${total_spent:.2f}
             - Active Categories: {', '.join(categories)}
             - Schema: Expenses have amount, category, store_name, description, date.
             
-            User is asking a question. If it needs specific data you don't have, ask them to query more specifically (e.g. 'How much on [Category]?').
-            If it's general advice or based on the summary above, answer directly.
-            Keep answers short and friendly.
+            User Question: {query}
+            
+            Instructions:
+            - If it needs specific data you don't have, ask them to query more specifically (e.g. 'How much on [Category]?').
+            - If it's general advice or based on the summary above, answer directly.
+            - Keep answers short, friendly, and helpful.
             """
 
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": query}
-                ],
-                max_tokens=150
-            )
-            return response.choices[0].message.content.strip()
+            response = self.model.generate_content(context_prompt)
+            return response.text.strip()
         except Exception as e:
             return f"I tried to think hard, but my brain hurt: {str(e)}"
