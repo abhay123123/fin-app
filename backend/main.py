@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from .routers import chat
+from . import models, schemas, database
 from datetime import timedelta
 from .services import ocr
 import shutil
