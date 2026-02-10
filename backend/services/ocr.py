@@ -52,19 +52,15 @@ def extract_amount(text: str) -> float:
             continue
             
         # Check for Total or variations
+        # Expanded to include common OCR misinterpretations if needed, but 'total' is standard.
+        # added 'amount due' as a common alternative.
         if 'total' in line_lower or 'amount due' in line_lower:
             # Attempt to extract number
-            # Using regex to find float values, allowing for spaces and commas
-            # Matches: 154.06, 154 . 06, 154,06, $154.06
-            # Clean the line of non-numeric chars except dot/comma first? 
-            # Or just use a flexible regex.
-            
-            # Simple flexible regex: look for digits, maybe space/dot/comma, then 2 digits
-            match = re.search(r'(\d+[\s\.,]*\d{2})', line)
+            # Using regex to find float values
+            match = re.search(r'(\d+\.\d{2})', line)
             if match:
-                val_str = match.group(1).replace(' ', '').replace(',', '.')
                 try:
-                    return float(val_str)
+                    return float(match.group(1))
                 except ValueError:
                     continue
 
@@ -73,18 +69,11 @@ def extract_amount(text: str) -> float:
     try:
         all_amounts = []
         for line in lines:
-            line_lower = line.lower()
-            # CRITICAL: Exclude subtotal/tax from fallback too!
-            if 'subtotal' in line_lower or 'tax' in line_lower:
-                continue
-
             # valid amounts often have a dot for cents
-            # Use same flexible regex
-            matches = re.findall(r'(\d+[\s\.,]*\d{2})', line)
+            matches = re.findall(r'(\d+\.\d{2})', line)
             for m in matches:
-                val_str = m.replace(' ', '').replace(',', '.')
                 try:
-                    val = float(val_str)
+                    val = float(m)
                     all_amounts.append(val)
                 except ValueError:
                     continue
