@@ -46,6 +46,11 @@ def extract_amount(text: str) -> float:
     # Heuristic: Look for "Total" line often at the bottom
     for line in reversed(lines):
         line_lower = line.lower()
+        
+        # Safe fix: Just exclude subtotal lines
+        if 'subtotal' in line_lower:
+            continue
+            
         if 'total' in line_lower:
             # Attempt to extract number
             # Using regex to find float values
