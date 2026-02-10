@@ -46,7 +46,15 @@ def extract_amount(text: str) -> float:
     # Heuristic: Look for "Total" line often at the bottom
     for line in reversed(lines):
         line_lower = line.lower()
-        if 'total' in line_lower:
+        
+        # Explicitly skip subtotal/tax lines to avoid false positives
+        if 'subtotal' in line_lower or 'tax' in line_lower:
+            continue
+            
+        # Check for Total or variations
+        # Expanded to include common OCR misinterpretations if needed, but 'total' is standard.
+        # added 'amount due' as a common alternative.
+        if 'total' in line_lower or 'amount due' in line_lower:
             # Attempt to extract number
             # Using regex to find float values
             match = re.search(r'(\d+\.\d{2})', line)
@@ -56,9 +64,24 @@ def extract_amount(text: str) -> float:
                 except ValueError:
                     continue
 
-    # Fallback: Just look for the largest monetary value in the text? 
-    # That might pick up a subtotal or tax, but often totals are largest.
-    # For now, stick to simple "Total" finding.
+    # Fallback: Find the largest monetary value in the text
+    # This handles cases where "Total" isn't read correctly (e.g. "7OTAL")
+    try:
+        all_amounts = []
+        for line in lines:
+            # valid amounts often have a dot for cents
+            matches = re.findall(r'(\d+\.\d{2})', line)
+            for m in matches:
+                try:
+                    val = float(m)
+                    all_amounts.append(val)
+                except ValueError:
+                    continue
+        
+        if all_amounts:
+            return max(all_amounts)
+    except Exception:
+        pass
     
     return 0.0
 
