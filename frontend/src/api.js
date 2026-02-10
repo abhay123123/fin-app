@@ -47,7 +47,7 @@ export const updateBudget = async (budgetData) => {
 };
 
 export const chatWithAnalyst = async (message) => {
-    const response = await axios.post(`${API_URL}/chat`, { message });
+    const response = await axios.post(`${API_URL}/api/chat`, { message });
     return response.data;
 };
 
