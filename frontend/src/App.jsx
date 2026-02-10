@@ -190,7 +190,7 @@ function App() {
 
       {/* Modals */}
       <Modal
-        isOpen={showModalCategory}
+        isOpen={showCategoryModal}
         onClose={() => setShowCategoryModal(false)}
         title="Manage Categories"
       >
