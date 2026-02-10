@@ -6,6 +6,9 @@ from io import BytesIO
 import shutil
 import os
 
+import cv2
+import numpy as np
+
 # Set tesseract path
 # 1. Try to find in system PATH (works for Linux/Docker/Correctly configured Windows)
 tesseract_path = shutil.which("tesseract")
@@ -20,12 +23,55 @@ if tesseract_path:
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
 else:
     print("Warning: Tesseract not found in PATH or common locations.")
+
+def preprocess_image(image_bytes: bytes):
+    """
+    Preprocesses the image for better OCR accuracy using OpenCV.
+    Steps:
+    1. Decode bytes to numpy array
+    2. Convert to Grayscale
+    3. Apply Otsu's Thresholding to binarize
+    """
+    try:
+        # 1. Convert bytes to numpy array
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        
+        # 2. Decode image
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # 3. Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # 4. Apply thresholding to get a binary image (black text on white background)
+        # Otsu's thresholding automatically finds the best threshold value
+        # cv2.THRESH_BINARY | cv2.THRESH_OTSU
+        _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        
+        # Optional: Denoising if needed, but simple receipts might just need thresholding
+        # thresh = cv2.medianBlur(thresh, 3)
+        
+        return thresh
+    except Exception as e:
+        print(f"Error during OpenCV preprocessing: {e}")
+        # Return original PIL image if preprocessing fails
+        return Image.open(BytesIO(image_bytes))
+
 def extract_text_from_image(image_bytes: bytes) -> str:
     """
     Extracts text from an image byte stream using Tesseract OCR.
     """
     try:
-        image = Image.open(BytesIO(image_bytes))
+        # Try preprocessing first
+        processed_img = preprocess_image(image_bytes)
+        
+        # Check if we got a numpy array (OpenCV image) or PIL Image (fallback)
+        if isinstance(processed_img, np.ndarray):
+            # Tesseract can handle numpy arrays directly in recent versions, 
+            # or convert back to PIL
+            image = Image.fromarray(processed_img)
+        else:
+            image = processed_img
+
         text = pytesseract.image_to_string(image)
         return text
     except Exception as e:
