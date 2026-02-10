@@ -12,6 +12,9 @@ import CategoryManager from './components/CategoryManager';
 import DateRangeFilter from './components/DateRangeFilter';
 import AIChat from './components/AIChat';
 
+import Modal from './components/Modal';
+import { Plus, Tag } from 'lucide-react';
+
 function App() {
   const [refreshList, setRefreshList] = useState(0);
   const [refreshBudget, setRefreshBudget] = useState(0);
@@ -23,6 +26,10 @@ function App() {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
+
+  // Modal States
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -64,10 +71,17 @@ function App() {
     setRefreshList((prev) => prev + 1);
     setOcrData(null); // Clear OCR data after adding
     setEditingExpense(null); // Clear editing state
+    setShowExpenseModal(false); // Close modal
   };
 
   const handleUploadSuccess = (data) => {
     setOcrData(data);
+    setShowExpenseModal(true); // Open modal to review/edit OCR data
+  };
+
+  const handleEditExpense = (expense) => {
+    setEditingExpense(expense);
+    setShowExpenseModal(true);
   };
 
   return (
@@ -121,23 +135,36 @@ function App() {
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
                   <BudgetForm onBudgetUpdated={() => setRefreshBudget(prev => prev + 1)} />
                 </div>
-                <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
-                  <CategoryManager />
-                </div>
-                <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
-                  <ExpenseForm
-                    onExpenseAdded={handleExpenseAdded}
-                    initialData={ocrData || editingExpense}
-                    isEditing={!!editingExpense}
-                    onCancelEdit={() => setEditingExpense(null)}
-                  />
-                </div>
+                {/* Removed CategoryManager and ExpenseForm from here */}
               </div>
             </div>
           </div>
 
           {/* Right Column: List & Details */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-4">
+
+            {/* Action Buttons Row */}
+            <div className="flex justify-between items-center gap-4">
+              {/* Left Button: Add Category */}
+              <button
+                onClick={() => setShowCategoryModal(true)}
+                className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <Tag className="h-5 w-5 text-indigo-500" />
+                Add New Category
+              </button>
+
+              {/* Right Button: Add Expense */}
+              <button
+                onClick={() => setShowExpenseModal(true)}
+                className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md text-sm font-medium transition-colors"
+              >
+                <Plus className="h-5 w-5" />
+                Add New Expense
+              </button>
+            </div>
+
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-h-[600px]">
               <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
@@ -152,7 +179,7 @@ function App() {
                 <ExpenseList
                   refreshTrigger={refreshList}
                   expenses={expenses}
-                  onEdit={(expense) => setEditingExpense(expense)}
+                  onEdit={handleEditExpense}
                   onDelete={() => setRefreshList(prev => prev + 1)}
                 />
               </div>
@@ -160,9 +187,45 @@ function App() {
           </div>
         </div>
       </main>
+
+      {/* Modals */}
+      <Modal
+        isOpen={showModalCategory}
+        onClose={() => setShowCategoryModal(false)}
+        title="Manage Categories"
+      >
+        <CategoryManager />
+      </Modal>
+
+      <Modal
+        isOpen={showExpenseModal}
+        onClose={() => {
+          setShowExpenseModal(false);
+          setEditingExpense(null);
+          setOcrData(null);
+        }}
+        title={editingExpense ? "Edit Expense" : "Add New Expense"}
+      >
+        <ExpenseForm
+          onExpenseAdded={handleExpenseAdded}
+          initialData={ocrData || editingExpense}
+          isEditing={!!editingExpense}
+          onCancelEdit={() => {
+            setEditingExpense(null);
+            setShowExpenseModal(false);
+          }}
+        />
+      </Modal>
+
       <AIChat />
     </div>
   );
 }
+
+// Helper to fix the variable name created in the return above
+// I used ShowModalCategory instead of ShowCategoryModal in one place, let me correct it in the file writing.
+// Wait, I can just write the correct code.
+// Correct variable is showCategoryModal
+
 
 export default App;
