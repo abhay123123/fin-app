@@ -70,6 +70,11 @@ export const deleteCategory = async (id) => {
 
 // --- Expense Actions ---
 
+export const clearExpenses = async () => {
+    const response = await axios.delete(`${API_URL}/expenses/`);
+    return response.data;
+};
+
 export const deleteExpense = async (id) => {
     const response = await axios.delete(`${API_URL}/expenses/${id}`);
     return response.data;

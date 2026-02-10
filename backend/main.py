@@ -252,6 +252,17 @@ def delete_category(category_id: int, db: Session = Depends(database.get_db)):
 
 # --- Expense Edit/Delete Endpoints ---
 
+@app.delete("/expenses/")
+def delete_all_expenses(db: Session = Depends(database.get_db)):
+    # Delete all rows in expenses table
+    try:
+        num_deleted = db.query(models.Expense).delete()
+        db.commit()
+        return {"message": f"Deleted {num_deleted} expenses"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete expenses: {str(e)}")
+
 @app.delete("/expenses/{expense_id}")
 def delete_expense(expense_id: int, db: Session = Depends(database.get_db)):
     db_expense = db.query(models.Expense).filter(models.Expense.id == expense_id).first()

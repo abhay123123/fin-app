@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteExpense } from '../api';
+import { deleteExpense, clearExpenses, getExpenses } from '../api';
 import { Trash2, Edit } from 'lucide-react';
 
 const ExpenseList = ({ refreshTrigger, expenses: propExpenses, onEdit, onDelete }) => {
@@ -129,6 +129,32 @@ const ExpenseList = ({ refreshTrigger, expenses: propExpenses, onEdit, onDelete 
                     </div>
                 ))}
             </div>
+
+            {/* Clear All Button */}
+            {expenses.length > 0 && (
+                <div className="mt-6 flex justify-center">
+                    <button
+                        onClick={async () => {
+                            if (window.confirm('Are you sure you want to delete ALL expenses? This action cannot be undone.')) {
+                                try {
+                                    await clearExpenses();
+                                    // Trigger refresh by calling onDelete if available (which usually triggers refresh in parent)
+                                    // Or we can just handle it if onDelete expects an ID, but here we just want refresh.
+                                    // In App.jsx, onDelete just increments refreshList, so calling it with no args is fine.
+                                    if (onDelete) onDelete();
+                                } catch (error) {
+                                    console.error("Failed to clear expenses:", error);
+                                    alert("Failed to delete expenses.");
+                                }
+                            }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition-colors font-medium text-sm"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        Clear All Expenses
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
