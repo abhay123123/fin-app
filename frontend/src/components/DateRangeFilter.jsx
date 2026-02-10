@@ -1,8 +1,9 @@
 import React from 'react';
 import { Download, Filter, X } from 'lucide-react';
 import { exportExpenses } from '../api';
+import CSVImport from './CSVImport';
 
-const DateRangeFilter = ({ startDate, endDate, onDateChange, onClear }) => {
+const DateRangeFilter = ({ startDate, endDate, onDateChange, onClear, onImportSuccess }) => {
 
     const handleExport = () => {
         exportExpenses(startDate, endDate);
@@ -44,13 +45,16 @@ const DateRangeFilter = ({ startDate, endDate, onDateChange, onClear }) => {
                 )}
             </div>
 
-            <button
-                onClick={handleExport}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full md:w-auto justify-center"
-            >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <CSVImport onImportSuccess={onImportSuccess} />
+                <button
+                    onClick={handleExport}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full md:w-auto justify-center"
+                >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export CSV
+                </button>
+            </div>
         </div>
     );
 };

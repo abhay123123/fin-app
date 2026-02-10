@@ -99,6 +99,81 @@ def export_expenses(
         headers={"Content-Disposition": "attachment; filename=expenses.csv"}
     )
 
+@app.post("/expenses/import")
+async def import_expenses(file: UploadFile = File(...), db: Session = Depends(database.get_db)):
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="Invalid file format. Please upload a CSV file.")
+
+    content = await file.read()
+    decoded_content = content.decode('utf-8').splitlines()
+    reader = csv.reader(decoded_content)
+    
+    # Optional: Skip header if present. 
+    # Heuristic: Check if first row contains "Amount" or "Date"
+    header = next(reader, None)
+    if header:
+        header_lower = [h.lower().strip() for h in header]
+        if "amount" not in header_lower and "date" not in header_lower:
+            # Maybe not a header, reset? simple csv import usually assumes header or specific order.
+            # Let's assume standard format: Date, Amount, Category, Store, Description
+            # Or standard export format: ID, Date, Amount, Category, Store, Description
+            pass
+        
+    imported_count = 0
+    errors = []
+    
+    for row in reader:
+        try:
+            # Expected minimal: Date, Amount
+            # Let's try to map by index for simplicity if no header mapping logic
+            # Assuming Export Format: ID, Date, Amount, Category, Store, Description (6 cols)
+            # OR Simple Format: Date, Amount, Category, Store, Description (5 cols)
+            
+            if len(row) < 2:
+                continue
+                
+            # parsers
+            date_str = row[0] if len(row) < 6 else row[1] # If ID is first
+            amount_str = row[1] if len(row) < 6 else row[2]
+            category_str = row[2] if len(row) >= 3 and len(row) < 6 else (row[3] if len(row) >= 4 else "Uncategorized")
+            store_str = row[3] if len(row) >= 4 and len(row) < 6 else (row[4] if len(row) >= 5 else "")
+            desc_str = row[4] if len(row) >= 5 and len(row) < 6 else (row[5] if len(row) >= 6 else "")
+            
+            # naive safe date parsing
+            # try YYYY-MM-DD then MM/DD/YYYY
+            expense_date = datetime.now()
+            for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y"):
+                try:
+                    expense_date = datetime.strptime(date_str, fmt)
+                    break
+                except ValueError:
+                    pass
+            
+            amount = float(amount_str.replace('$', '').replace(',', ''))
+            
+            # Normalize category
+            category = category_str.strip() or "Uncategorized"
+            
+            # Check if category exists, if not create it? 
+            # For now, just string.
+            
+            new_expense = models.Expense(
+                amount=amount,
+                category=category,
+                store_name=store_str.strip(),
+                description=desc_str.strip(),
+                created_at=expense_date
+            )
+            db.add(new_expense)
+            imported_count += 1
+            
+        except Exception as e:
+            errors.append(f"Row error: {e}")
+            continue
+
+    db.commit()
+    return {"message": f"Successfully imported {imported_count} expenses", "errors": errors}
+
 @app.post("/upload-receipt/")
 async def upload_receipt(file: UploadFile = File(...)):
     temp_file = f"temp_{file.filename}"

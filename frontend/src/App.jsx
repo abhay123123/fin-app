@@ -117,6 +117,7 @@ function App() {
           endDate={endDate}
           onDateChange={handleDateChange}
           onClear={handleClearFilters}
+          onImportSuccess={() => setRefreshList(prev => prev + 1)}
         />
 
         <DashboardStats expenses={expenses} refreshTrigger={refreshBudget} />
