@@ -56,27 +56,61 @@ def preprocess_image(image_bytes: bytes):
         # Return original PIL image if preprocessing fails
         return Image.open(BytesIO(image_bytes))
 
-def extract_text_from_image(image_bytes: bytes) -> str:
+def extract_text_from_image(image_bytes: bytes, use_preprocessing: bool = True) -> str:
     """
     Extracts text from an image byte stream using Tesseract OCR.
     """
     try:
-        # Try preprocessing first
-        processed_img = preprocess_image(image_bytes)
-        
-        # Check if we got a numpy array (OpenCV image) or PIL Image (fallback)
-        if isinstance(processed_img, np.ndarray):
-            # Tesseract can handle numpy arrays directly in recent versions, 
-            # or convert back to PIL
-            image = Image.fromarray(processed_img)
+        image = None
+        if use_preprocessing:
+            # Try preprocessing first
+            processed_img = preprocess_image(image_bytes)
+            
+            # Check if we got a numpy array (OpenCV image) or PIL Image (fallback)
+            if isinstance(processed_img, np.ndarray):
+                # Tesseract can handle numpy arrays directly in recent versions, 
+                # or convert back to PIL
+                image = Image.fromarray(processed_img)
+            else:
+                image = processed_img
         else:
-            image = processed_img
+            # Use original image
+            image = Image.open(BytesIO(image_bytes))
 
         text = pytesseract.image_to_string(image)
         return text
     except Exception as e:
-        print(f"Error during OCR extraction: {e}")
+        print(f"Error during OCR extraction (preprocessing={use_preprocessing}): {e}")
         return ""
+
+
+
+def process_receipt(image_bytes: bytes):
+    # 1. Try with preprocessing
+    text = extract_text_from_image(image_bytes, use_preprocessing=True)
+    amount = extract_amount(text)
+    store_name = extract_store_name(text)
+    
+    # 2. Fallback: If amount is 0, try without preprocessing
+    if amount == 0.0:
+        print("Preprocessing yielded 0 amount. Retrying with original image...")
+        text_orig = extract_text_from_image(image_bytes, use_preprocessing=False)
+        amount_orig = extract_amount(text_orig)
+        
+        # If original found something, use it
+        if amount_orig > 0:
+            print(f"Original image yielded amount: {amount_orig}")
+            text = text_orig
+            amount = amount_orig
+            store_name = extract_store_name(text_orig)
+            
+    # Return structure matching what frontend expects/can use
+    return {
+        "text": text, 
+        "amount": amount, 
+        "store_name": store_name,
+        "category": "Uncategorized" # Default category hint
+    }
 
 def extract_amount(text: str) -> float:
     """
@@ -124,14 +158,4 @@ def extract_store_name(text: str) -> str:
         return lines[0]
     return "Unknown Store"
 
-def process_receipt(image_bytes: bytes):
-    text = extract_text_from_image(image_bytes)
-    amount = extract_amount(text)
-    store_name = extract_store_name(text)
-    # Return structure matching what frontend expects/can use
-    return {
-        "text": text, 
-        "amount": amount, 
-        "store_name": store_name,
-        "category": "Uncategorized" # Default category hint
-    }
+
